@@ -18,18 +18,22 @@ contract TokenSender{
 
     using ECDSA for bytes32;
 
-    function getHash(address sender, uint amount, address recipient, address tokenContract) public pure returns(bytes32) {
-        return keccak256(abi.encodePacked(sender, amount, recipient, tokenContract));
+    mapping(bytes32 => bool) public executed;
+
+    function getHash(address sender, uint amount, address recipient, address tokenContract, uint nonce) public pure returns(bytes32) {
+        return keccak256(abi.encodePacked(sender, amount, recipient, tokenContract, nonce));
     }
 
-    function tokenTransfer(address sender, uint amount, address recipient, address tokenContract, bytes memory signature) public {
-        bytes32 messageHash = getHash(sender, amount, recipient, tokenContract);
+    function tokenTransfer(address sender, uint amount, address recipient, address tokenContract, bytes memory signature, uint nonce) public {
+        bytes32 messageHash = getHash(sender, amount, recipient, tokenContract, nonce);
         bytes32 signedMessageHash = messageHash.toEthSignedMessageHash();
 
         address signer = signedMessageHash.recover(signature);
         require(signer == sender,"Signature is not from sender");
+        executed[messageHash] = true;
 
         bool sent = ERC20(tokenContract).transferFrom(sender, recipient, amount);
         require(sent,"Failed to send the tokens");
+        
     }
 }

@@ -59,7 +59,7 @@ describe("Meta transaction of token transfer", function(){
         )
         await transferTxn.wait();
 
-        const senderBalance = await _randomTokenContract.balanceOf(
+        const senderBalance = await _randomTokenContract.balanceOf( 
             sender.address
         )
         const recipentBalance = await _randomTokenContract.balanceOf(
